@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NONE
+}
+
+model Student {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  username  String    @db.VarChar(50)
+  gender    Gender    @default(NONE)
+  classroom String
+  birthDate DateTime?
+  borrow    Borrows[]
+}
+
+model Book {
+  id          Int       @id @default(autoincrement())
+  title       String    @unique
+  description String?
+  borrow      Borrows[]
+  type        Type      @relation(fields: [typeId], references: [id])
+  author      Author    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    Int
+  typeId      Int
+}
+
+model Borrows {
+  id        Int      @id @default(autoincrement())
+  student   Student  @relation(fields: [StudentId], references: [id])
+  book      Book     @relation(fields: [bookId], references: [id])
+  StudentId Int
+  bookId    Int
+  createdAt DateTime @default(now())
+}
+
+model Author {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  book Book[]
+}
+
+model Type {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  books Book[]
+}
